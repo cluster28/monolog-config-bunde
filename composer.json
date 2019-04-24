@@ -1,0 +1,25 @@
+{
+  "name": "cluster28/monolog-config-bundle",
+  "type": "symfony-bundle",
+  "description": "Monolog config bundle",
+  "keywords": [
+
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Jordi Rejas",
+      "email": "github@rejas.eu"
+    }
+  ],
+  "require": {
+    "php": ">=5.3.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "MonologConfigBundle\\": ""
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}

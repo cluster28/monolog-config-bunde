@@ -17,13 +17,14 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('monolog_config')
+        $treeBuilder->root('monolog_config')
         ->children()
             ->arrayNode('sources')
             ->addDefaultsIfNotSet()
                 ->children()
                     ->arrayNode('files')
                         ->prototype('scalar')->end()
+                        ->defaultValue(['https://raw.githubusercontent.com/cluster28/monolog-config-bundle/master/Resources/config/monolog_config.yml'])
                     ->end()
                     ->arrayNode('cdn')
                     ->end()

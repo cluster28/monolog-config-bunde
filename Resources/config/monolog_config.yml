@@ -1,0 +1,50 @@
+monolog:
+    config:
+        handlers:
+            mail:
+                type:           fingers_crossed
+                action_level:   critical
+                handler:        buffered
+            buffered:
+                type:           buffer
+                handler:        swift
+            swift:
+                type:           swift_mailer
+                from_email:     "%mailer_user%"
+                to_email:       "%mailer_error_destination%"
+                subject:        "[%kernel.environment%] %mailer_error_subject% [Channel: %%channel%%]"
+                level:          info
+                content_type:   text/html
+                formatter:      monolog.formatter.html
+    prod:
+        handlers:
+            main:
+                type: fingers_crossed
+                action_level: critical
+                handler: nested
+            nested:
+                type:  rotating_file
+                path:  "%kernel.logs_dir%/kernel.environment.log"
+                level: debug
+                max_files: 10
+            console:
+                type: console
+                process_psr_3_messages: false
+    dev:
+        handlers:
+            main:
+                type: stream
+                path: "%kernel.logs_dir%/kernel.environment.log"
+                level: debug
+                channels:
+                    - "!event"
+                    - "!request"
+                    - "!php"
+                    - "!doctrine"
+                    - "!translation"
+                    - "!security"
+
+parameters:
+    config:
+        mailer_error_destination: "my@domain.com"
+        mailer_error_subject: "Mail error subject"

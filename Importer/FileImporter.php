@@ -31,8 +31,11 @@ class FileImporter implements ImporterInterface
     {
         $arrayConfigs = [];
         foreach ($this->arrayFiles as $file) {
-            if (is_file($file)) {
-                $arrayConfigs = array_merge($arrayConfigs, Yaml::parseFile($file));
+            if ($input = file_get_contents($file)) {
+                $arrayConfigs = array_merge(
+                    $arrayConfigs,
+                    Yaml::parse($input)
+                );
             }
         }
         return $arrayConfigs;

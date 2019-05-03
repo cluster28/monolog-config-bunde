@@ -40,8 +40,11 @@ class MonologConfigExtension extends Extension implements PrependExtensionInterf
             $this->monologConfigs = $this->mergeConfiguration($this->monologConfigs, new FileImporter($config['sources']['files']));
         }
 
-        $this->addConfig('config', $container);
-        $this->addConfig($container->getParameter("kernel.environment"), $container);
+        foreach ($this->monologConfigs as $definition => $arrayValues) {
+            $this->addDefinitionConfigs($definition, $container);
+        }
+
+        $this->addParameters($container->getParameter("kernel.environment"), $container);
     }
 
     /**
@@ -55,23 +58,60 @@ class MonologConfigExtension extends Extension implements PrependExtensionInterf
     }
 
     /**
-     * @param $env
+     * @param $definition
      * @param ContainerBuilder $container
      */
-    private function addConfig($env, ContainerBuilder $container)
+    private function addDefinitionConfigs($definition, ContainerBuilder $container)
     {
-        if (isset($this->monologConfigs['monolog']) && isset($this->monologConfigs['monolog'][$env])) {
-            foreach ($this->monologConfigs['monolog'][$env]['handlers'] as $name => $values) {
+        if ($container->hasExtension($definition) || $definition === 'app') {
+            foreach ($this->monologConfigs[$definition] as $environment => $environmentConfig) {
+                if (in_array($environment, ['config', $container->getParameter("kernel.environment")])) {
+                    $this->addHandlers($environmentConfig, $container);
+                }
+            }
+        }
+    }
+
+    /**
+     * @param $environmentConfig
+     * @param ContainerBuilder $container
+     */
+    private function addHandlers($environmentConfig, ContainerBuilder $container)
+    {
+        if (isset($environmentConfig['handlers'])) {
+            foreach ($environmentConfig['handlers'] as $name => $values) {
                 $container->prependExtensionConfig('monolog', [
                     'handlers' => [$name => $values]
                 ]);
             }
         }
+    }
 
-        if (isset($this->monologConfigs['parameters']) && isset($this->monologConfigs['parameters'][$env])) {
-            foreach ($this->monologConfigs['parameters'][$env] as $name => $value) {
-                $container->setParameter($name, $value);
+    /**
+     * @param $currentEnvironment
+     * @param ContainerBuilder $container
+     */
+    private function addParameters($currentEnvironment, ContainerBuilder $container)
+    {
+        if (!$parameters = $this->getConfigParameters()) {
+            return;
+        }
+
+        foreach ($parameters as $environment => $arrayParameters) {
+            if (in_array($environment, ['config', $currentEnvironment])) {
+                foreach ($arrayParameters as $name => $value) {
+                    $container->setParameter($name, $value);
+                }
             }
         }
+
+    }
+
+    /**
+     * @return mixed|null
+     */
+    private function getConfigParameters()
+    {
+        return isset($this->monologConfigs['parameters']) ? $this->monologConfigs['parameters'] : null ;
     }
 }

@@ -1,4 +1,4 @@
-monolog:
+app:
     config:
         handlers:
             mail:
